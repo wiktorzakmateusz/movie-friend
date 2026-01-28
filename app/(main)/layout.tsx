@@ -1,4 +1,6 @@
+import AuthProvider from "../../components/SessionProvider";
 import Navbar from "@/components/Navbar";
+
 
 export default function MainLayout({
   children,
@@ -7,11 +9,12 @@ export default function MainLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="flex-1">
-        {children}
-      </div>
-      {/* Optional: Common Footer for main app area */}
+      <AuthProvider>
+        <Navbar />
+        <div className="flex-1">
+          {children}
+        </div>
+      </AuthProvider>
       <footer className="w-full flex justify-between px-8 py-4 text-xs text-gray-400 border-t bg-gray-50">
         <span>info & contact</span>
         <span>report an issue</span>

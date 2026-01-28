@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, ChangeEvent, FormEvent } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -17,39 +18,22 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    // 1. We only use signIn. 
+    // This triggers the logic we wrote in 'api/auth/[...nextauth]/route.ts'
+    const res = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false, // We handle redirection manually below
+    });
 
-    try {
-      // We will create this backend endpoint next!
-      const response = await fetch(`${API_URL}/token`, {
-        method: "POST",
-        // FastAPI OAuth2 expects form-data by default, but we can configure it for JSON
-        // For now, let's assume we will build a JSON login endpoint.
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Invalid credentials");
-      }
-
-      const data = await response.json();
-      
-      // Save the token (basic example - better to use cookies/NextAuth later)
-      localStorage.setItem("token", data.access_token);
-      
-      // alert("Login successful!");
-      router.push("/dashboard"); // Redirect to your movie page
-
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred');
-      }
+    // 2. Handle the result from NextAuth
+    if (res?.error) {
+      // res.error comes from the 'return null' in your authorize() callback
+      setError("Invalid email or password");
+    } else {
+      // Success! NextAuth has set the cookie. We just need to move to the dashboard.
+      router.push("/dashboard");
+      router.refresh(); // Optional: ensures the new session is recognized immediately
     }
   };
 

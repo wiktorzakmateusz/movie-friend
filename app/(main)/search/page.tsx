@@ -21,10 +21,6 @@ export default function SearchPage() {
             className="border-2 border-gray-300 rounded-lg px-6 py-3 w-full md:w-64"
           />
         </div>
-
-        <div className="text-gray-400 mt-12 text-2xl font-bold tracking-widest">
-            [...]
-        </div>
       </div>
     </div>
   );
