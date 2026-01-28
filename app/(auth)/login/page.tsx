@@ -17,9 +17,11 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
     try {
       // We will create this backend endpoint next!
-      const response = await fetch("http://127.0.0.1:8000/token", {
+      const response = await fetch('${API_URL}/token', {
         method: "POST",
         // FastAPI OAuth2 expects form-data by default, but we can configure it for JSON
         // For now, let's assume we will build a JSON login endpoint.
@@ -39,7 +41,7 @@ export default function LoginPage() {
       // Save the token (basic example - better to use cookies/NextAuth later)
       localStorage.setItem("token", data.access_token);
       
-      alert("Login successful!");
+      // alert("Login successful!");
       router.push("/dashboard"); // Redirect to your movie page
 
     } catch (err) {

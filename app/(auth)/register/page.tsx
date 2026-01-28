@@ -28,9 +28,11 @@ export default function RegisterPage() {
       return;
     }
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
     try {
       // 2. Send data to FastAPI
-      const response = await fetch("http://127.0.0.1:8000/users/", {
+      const response = await fetch("${API_URL}/users/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -46,7 +48,7 @@ export default function RegisterPage() {
       }
 
       // 3. Success! Redirect to Login
-      alert("Account created! Please log in.");
+      // alert("Account created! Please log in.");
       router.push("/login");
 
     } catch (err) {
