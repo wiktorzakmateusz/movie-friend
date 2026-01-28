@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
     try {
       // 2. Send data to FastAPI
-      const response = await fetch("${API_URL}/users/", {
+      const response = await fetch(`${API_URL}/users/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

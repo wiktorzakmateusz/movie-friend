@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       // We will create this backend endpoint next!
-      const response = await fetch("${API_URL}/token", {
+      const response = await fetch(`${API_URL}/token`, {
         method: "POST",
         // FastAPI OAuth2 expects form-data by default, but we can configure it for JSON
         // For now, let's assume we will build a JSON login endpoint.
