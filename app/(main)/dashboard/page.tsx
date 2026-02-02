@@ -48,8 +48,7 @@ export default function Dashboard() {
 
     fetchMovies();
   }, []);
-
-  console.log("Data from backend:", movies[0]);
+  
   return (
     <div className="flex min-h-screen bg-gray-50 relative overflow-x-hidden">
       
