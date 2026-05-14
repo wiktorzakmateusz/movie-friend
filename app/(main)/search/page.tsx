@@ -1,9 +1,12 @@
-"use client";
+// movie search page
+
+"use client"; // client-side rendering
 
 import { useState } from "react";
 import MovieCard from "@/components/MovieCard";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2 } from "lucide-react"; // icons
 
+// Movie object from backend scheme
 interface Movie {
   id: number;
   title: string;
@@ -31,12 +34,13 @@ export default function SearchPage() {
     setMovies([]);
 
     try {
+      // adding parameters to a request
       const params = new URLSearchParams();
       if (title.trim()) params.append("title", title);
       if (genre.trim()) params.append("genre", genre);
       if (keyword.trim()) params.append("keyword", keyword);
 
-      const res = await fetch(`/api/search?${params.toString()}`);
+      const res = await fetch(`/api/search?${params.toString()}`); // call to proxy api - search
 
       if (!res.ok) {
         throw new Error("Failed to fetch results");
@@ -58,17 +62,19 @@ export default function SearchPage() {
     }
   };
 
+  // page content
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-10">
           <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center md:text-left">
+            {/* header */}
             Find a Movie
           </h1>
 
           <div className="flex flex-col md:flex-row gap-4 items-end">
-            {/* Title Input */}
+            {/* title input */}
             <div className="w-full md:flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Title</label>
               <input
@@ -81,7 +87,7 @@ export default function SearchPage() {
               />
             </div>
 
-            {/* Genre Input */}
+            {/* genre input */}
             <div className="w-full md:flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Genre</label>
               <input
@@ -94,7 +100,7 @@ export default function SearchPage() {
               />
             </div>
 
-            {/* Keyword Input */}
+            {/* keyword input */}
             <div className="w-full md:flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Keyword</label>
               <input
@@ -107,7 +113,7 @@ export default function SearchPage() {
               />
             </div>
 
-            {/* Search Button */}
+            {/* search button */}
             <button
               onClick={handleSearch}
               disabled={isLoading}
@@ -124,7 +130,8 @@ export default function SearchPage() {
             </button>
           </div>
         </div>
-
+        
+        {/* found movies grid */}
         <div className="mb-12">
           {error ? (
             <div className="text-center p-12 bg-red-50 rounded-xl border border-red-100 text-red-600">
@@ -135,13 +142,13 @@ export default function SearchPage() {
               <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
               <p className="text-gray-500">Searching database...</p>
             </div>
-          ) : movies.length > 0 ? (
+          ) : movies.length > 0 ? (  // found movies
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {movies.map((movie) => (
                 <MovieCard key={movie.id} {...movie} />
               ))}
             </div>
-          ) : hasSearched ? (
+          ) : hasSearched ? ( // no movies found
             <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
               <p className="text-gray-500 text-lg">No movies found matching your filters.</p>
               <button 
@@ -152,7 +159,7 @@ export default function SearchPage() {
               </button>
             </div>
           ) : (
-            // Initial State (User hasn't searched yet)
+            // initial state before user searched
             <div className="text-center py-20 opacity-50">
               <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">Enter a filter above to start searching</p>

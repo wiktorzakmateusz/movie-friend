@@ -1,3 +1,5 @@
+// router to register a user
+
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -5,16 +7,16 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { nickname, email, password } = body;
 
-    // 1. Send data to your Python Backend
-    // Note: We don't need NEXT_PUBLIC_ here because this runs on the server
     const API_URL = process.env.NEXT_PUBLIC_API_URL; 
     
+    // sending the data to backend
     const response = await fetch(`${API_URL}/users/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nickname, email, password }),
     });
 
+    // returning failure
     if (!response.ok) {
         const errorData = await response.json();
         return NextResponse.json(
@@ -25,7 +27,7 @@ export async function POST(req: Request) {
 
     const data = await response.json();
     
-    // 2. Return success to the frontend
+    // returning succes
     return NextResponse.json(data, { status: 201 });
 
   } catch (error) {

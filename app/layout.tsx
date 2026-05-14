@@ -1,3 +1,5 @@
+// general layout of the app
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";

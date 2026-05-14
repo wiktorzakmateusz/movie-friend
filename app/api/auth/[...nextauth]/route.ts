@@ -1,6 +1,8 @@
-import NextAuth from "next-auth";
-import { authOptions } from "@/utils/auth"; // Import from the new file
+// authentication router
 
-const handler = NextAuth(authOptions);
+import NextAuth from "next-auth"; 
+import { authOptions } from "@/utils/auth"; // configurations details
+
+const handler = NextAuth(authOptions); // custom authentication handler
 
 export { handler as GET, handler as POST };

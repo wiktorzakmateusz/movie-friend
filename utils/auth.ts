@@ -1,18 +1,19 @@
-// lib/auth.ts
+// NextAuth.js configuration file
+
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    CredentialsProvider({
+    CredentialsProvider({ // custom authentication system
       name: "Credentials",
-      credentials: {
+      credentials: { // expected inputs
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials) { // SignIn() configuration
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/token`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/token`, { // backend call
             method: 'POST',
             body: JSON.stringify({
               email: credentials?.email,
@@ -23,8 +24,8 @@ export const authOptions: NextAuthOptions = {
 
           const data = await res.json();
 
-          if (res.ok && data.access_token) {
-            return { 
+          if (res.ok && data.access_token) { // return User & token
+            return {
               id: credentials?.email || "1", 
               email: credentials?.email,
               name: credentials?.email, 
@@ -32,7 +33,7 @@ export const authOptions: NextAuthOptions = {
             };
           }
           return null;
-        } catch (e) {
+        } catch (e) { // failure
           console.error(e);
           return null;
         }
@@ -40,17 +41,17 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }: any) { // token cookie
       if (user) {
         token.accessToken = user.accessToken;
       }
       return token;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }: any) { // token retrival for authenticated requests
       session.user.accessToken = token.accessToken;
       return session;
     }
   },
-  session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: "jwt" }, // cookies
+  secret: process.env.NEXTAUTH_SECRET, // cryptographic string to encrypt JWT cookie
 };

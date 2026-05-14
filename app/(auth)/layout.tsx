@@ -1,3 +1,5 @@
+// general layout for login and register pages
+
 import AuthNavbar from "@/components/AuthNavbar";
 
 export default function AuthLayout({
@@ -7,10 +9,10 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen relative flex flex-col">
-      {/* This adds the Logo bar to all auth pages */}
+      {/* navigation bar */}
       <AuthNavbar />
       
-      {/* This is where the Login or Register page content is rendered */}
+      {/* page content */}
       <div className="flex-1 flex items-center justify-center">
         {children}
       </div>

@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'm.media-amazon.com', // Allow Amazon/IMDb images
+        hostname: 'm.media-amazon.com',
       },
     ],
   },

@@ -1,50 +1,52 @@
-"use client";
+// login page
+
+"use client"; // client-side rendering
 
 import Link from "next/link";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; 
 
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
+  // fields change handler
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // log in handler
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
-    // 1. We only use signIn. 
-    // This triggers the logic we wrote in 'api/auth/[...nextauth]/route.ts'
+    // sending login credentials to api
     const res = await signIn("credentials", {
       email: formData.email,
       password: formData.password,
-      redirect: false, // We handle redirection manually below
+      redirect: false,
     });
 
-    // 2. Handle the result from NextAuth
-    if (res?.error) {
-      // res.error comes from the 'return null' in your authorize() callback
+    if (res?.error) { // incorrect credentials
       setError("Invalid email or password");
-    } else {
-      // Success! NextAuth has set the cookie. We just need to move to the dashboard.
-      router.push("/dashboard");
-      router.refresh(); // Optional: ensures the new session is recognized immediately
+    } else { // correct credentials
+      router.push("/dashboard"); // move to main page
+      router.refresh();
     }
   };
 
+  // page UI
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
       <div className="w-full max-w-md border border-gray-300 rounded-2xl p-10 shadow-sm">
         
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        {/* displays error if there is one */}
+        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>} 
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <input
+          <input // email
             name="email"
             type="text"
             placeholder="Email"
@@ -52,7 +54,7 @@ export default function LoginPage() {
             onChange={handleChange}
             className="w-full border border-gray-400 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
           />
-          <input
+          <input // password
             name="password"
             type="password"
             placeholder="Password"
@@ -61,11 +63,13 @@ export default function LoginPage() {
             className="w-full border border-gray-400 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
           />
 
+          {/* log in button */}
           <button className="w-full bg-transparent border border-gray-400 py-2 rounded-lg hover:bg-gray-50 transition mt-2">
             Log In
           </button>
         </form>
 
+        {/* sign in link */}
         <div className="mt-6 text-center">
           <Link href="/register" className="text-sm text-gray-500 hover:text-blue-600">
             Don't have an account? Sign Up!

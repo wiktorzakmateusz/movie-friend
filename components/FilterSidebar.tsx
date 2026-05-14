@@ -1,6 +1,8 @@
-"use client";
+// component with filtering and sorting on /dashboard page
+
+"use client"; // client-side rendering
 import { useState } from "react";
-import { X, Star } from "lucide-react";
+import { X, Star } from "lucide-react"; // icons
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,56 +14,46 @@ const AVAILABLE_GENRES = [
 ];
 
 export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
-  // Local state for the inputs
+
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [minYear, setMinYear] = useState<string>("2000");
   const [minRating, setMinRating] = useState<number>(3.0);
 
-  // Toggle a genre in the array
+  // genre toggle
   const handleGenreToggle = (genre: string) => {
     setSelectedGenres((prev) =>
       prev.includes(genre)
-        ? prev.filter((g) => g !== genre) // Remove if exists
-        : [...prev, genre]                // Add if doesn't exist
+        ? prev.filter((g) => g !== genre) // remove if selected
+        : [...prev, genre] // add if not selected
     );
   };
 
   return (
     <>
-      {/* 1. Backdrop */}
+      {/* Open/Close */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity" // semi-transparent black background
           onClick={onClose}
         />
       )}
 
-      {/* 2. Sidebar Panel */}
-      <aside 
+      <aside // sliding animation
         className={`
           fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 
           transform transition-transform duration-300 ease-in-out flex flex-col
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
-        {/* Header
-        <div className="flex justify-between items-center p-6 border-b shrink-0">
-          <h3 className="font-bold text-lg">Filters & Sorting</h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div> */}
-        
-        {/* Scrollable Content */}
+      {/* form */}
         <div className="p-6 overflow-y-auto flex-1 space-y-8">
           
-          {/* --- FILTERS SECTION --- */}
           <div>
               <h4 className="font-semibold text-sm text-gray-500 mb-4 tracking-wider">FILTERS</h4>
               
               <div className="space-y-6">
                   
-                  {/* 1. Genre Filter (Multi-select) */}
+                  {/* genre filter */}
                   <div>
                     <p className="font-medium text-sm mb-2 text-gray-700">Genre</p>
                     <div className="grid grid-cols-2 gap-2">
@@ -79,7 +71,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
                     </div>
                   </div>
 
-                  {/* 2. Year Filter (Number Input) */}
+                  {/* year filter */}
                   <div>
                     <label className="font-medium text-sm text-gray-700 mb-2 block">
                       Released after (Year)
@@ -94,7 +86,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
                     />
                   </div>
 
-                  {/* 3. Min Rating (Slider 0.5 - 5.0) */}
+                  {/* min rating slider */}
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="font-medium text-sm text-gray-700">Min Rating</label>
@@ -122,7 +114,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
 
           <hr className="border-gray-100" />
 
-          {/* --- SORTING SECTION --- */}
+          {/* sorting options */}
           <div>
               <h4 className="font-semibold text-sm text-gray-500 mb-3 tracking-wider">SORTING</h4>
               <div className="space-y-2 text-sm text-gray-600">
@@ -142,7 +134,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
 
-        {/* Footer Actions (Optional) */}
+        {/* show results button */}
         <div className="p-6 border-t bg-gray-50 shrink-0">
           <button 
             onClick={onClose}

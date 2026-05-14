@@ -1,9 +1,11 @@
-"use client";
+// register page
+
+"use client"; // client-side rendering
 
 import Link from "next/link";
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react"; // Used for auto-login after registration
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,18 +16,21 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
+  // tracks whether the registration request is currently processing
+  const [isLoading, setIsLoading] = useState(false); 
+  
+  // fields change handler
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // registering handler
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
+    setIsLoading(true); // disables sign in button
 
-    // 1. Client-side Validation
+    // second password check
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
@@ -33,7 +38,7 @@ export default function RegisterPage() {
     }
 
     try {
-      // 2. Call internal Next.js API Route (The Proxy)
+      // proxy api call
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,42 +51,35 @@ export default function RegisterPage() {
 
       const data = await res.json();
 
-      if (!res.ok) {
+      // failed registration & errors handling
+      if (!res.ok) { 
         let errorMessage = "Registration failed";
 
-        // 1. Check if the backend sent a list of validation errors (FastAPI/Pydantic style)
         if (Array.isArray(data.message)) {
-             // Combine all validation messages into one string
-             errorMessage = data.message
-               .map((err: any) => err.msg || JSON.stringify(err))
-               .join(", ");
+          errorMessage = data.message
+            .map((err: any) => err.msg || JSON.stringify(err))
+            .join(", ");
         } 
-        // 2. Check if it's a generic object error
         else if (typeof data.message === 'object') {
-             errorMessage = JSON.stringify(data.message);
+          errorMessage = JSON.stringify(data.message);
         } 
-        // 3. Otherwise, it's a normal string
         else if (data.message) {
-             errorMessage = data.message;
+          errorMessage = data.message;
         }
-
         throw new Error(errorMessage);
       }
 
-      // 3. Auto-Login (UX Improvement)
-      // Immediately sign the user in so they land on the dashboard
+      // auto login
       const loginRes = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
         redirect: false,
       });
 
-      if (loginRes?.error) {
-        // If auto-login fails for some reason, send them to login page
+      if (loginRes?.error) { // if fails to login, move to /login
         router.push("/login");
-      } else {
-        // Success! Go to dashboard
-        router.push("/dashboard");
+      } else { // move to main page
+        router.push("/dashboard"); 
         router.refresh();
       }
 
@@ -92,17 +90,18 @@ export default function RegisterPage() {
         setError("An unexpected error occurred");
       }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // enables sign in button
     }
   };
 
+  // page UI
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
       <div className="w-full max-w-md border border-gray-300 rounded-2xl p-10 shadow-sm">
         
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Create Account</h2>
 
-        {/* Error Message */}
+        {/* displays error if there is one */}
         {error && (
           <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4 text-center border border-red-100">
             {error}
@@ -111,7 +110,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <input
+            <input // nickname
               name="nickname"
               type="text"
               placeholder="Nickname"
@@ -123,7 +122,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <input
+            <input // email
               name="email"
               type="email"
               placeholder="Email"
@@ -135,7 +134,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <input
+            <input // password
               name="password"
               type="password"
               placeholder="Password"
@@ -147,7 +146,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <input
+            <input // password confirmation
               name="confirmPassword"
               type="password"
               placeholder="Confirm Password"
@@ -158,7 +157,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <button
+          <button // sign up button
             type="submit"
             disabled={isLoading}
             className={`w-full bg-blue-900 text-white font-medium py-3 rounded-lg hover:bg-blue-800 transition mt-2 
@@ -168,6 +167,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
+        {/* login link */}
         <div className="mt-6 text-center">
           <Link href="/login" className="text-sm text-gray-500 hover:text-blue-600 transition">
             Already have an account? <span className="font-semibold">Log In</span>

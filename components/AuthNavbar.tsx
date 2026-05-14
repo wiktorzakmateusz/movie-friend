@@ -1,11 +1,12 @@
+// component with navigation bar during authentication
+
 import Link from "next/link";
 import Image from "next/image";
 
 export default function AuthNavbar() {
   return (
     <nav className="absolute top-0 w-full px-8 py-6 flex items-center bg-transparent">
-      {/* Logo Section */}
-      <Link href="/" className="flex items-center gap-3">
+      <Link href="/" className="flex items-center gap-3"> {/* back to home page wrapper */}
         <div className="relative w-12 h-12"> 
             <Image 
               src="/logo.png" 
