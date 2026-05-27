@@ -77,8 +77,12 @@ export default defineConfig({
     // url: 'http://localhost:3000',
 
     // prod
-    command: 'npm run build && npm run start', 
+    command: 'npm run start', 
     url: 'http://127.0.0.1:3000',
+
+    // shows logs in console
+    stdout: 'pipe',
+    stderr: 'pipe',
 
     timeout: 180 * 1000, 
     
