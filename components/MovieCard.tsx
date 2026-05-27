@@ -114,7 +114,7 @@ export default function MovieCard({
 
   // content
   return (
-    <div className="flex flex-col gap-2 w-48 group relative">
+    <div className="movie-card flex flex-col gap-2 w-48 group relative">
       {/* link to the movie page */}
       <Link href={`/movie/${id}`} className="block relative cursor-pointer"> 
         <div className="relative w-full h-72 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all bg-gray-200">
@@ -166,6 +166,7 @@ export default function MovieCard({
                 return (
                   <button
                     key={starValue}
+                    aria-label={`Rate ${starValue} stars`}
                     onClick={(e) => handleRate(e, starValue)}
                     onMouseEnter={() => setHoverRating(starValue)}
                     disabled={isUpdating}

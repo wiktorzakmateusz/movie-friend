@@ -195,6 +195,7 @@ export default function MovieDetailPage() {
                       return (
                         <button
                           key={starValue}
+                          aria-label={`Rate ${starValue} stars`}
                           onClick={(e) => handleRate(e, starValue)}
                           onMouseEnter={() => setHoverRating(starValue)}
                           disabled={isUpdating}
