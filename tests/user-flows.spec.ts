@@ -4,7 +4,7 @@ test.describe('Movie Friend Core User Flows', () => {
 
   test('User can log in and view the cold-start dashboard', async ({ page }) => {
     // navigates to the login page
-    await page.goto('http://localhost:3000/login');
+    await page.goto('/login');
 
     // fills out the login form
     await page.fill('input[name="email"]', 'user@example.com');
@@ -14,7 +14,7 @@ test.describe('Movie Friend Core User Flows', () => {
     await page.click('button[type="submit"]');
 
     // verifies successful redirect to the dashboard
-    await expect(page).toHaveURL('http://localhost:3000/dashboard');
+    await expect(page).toHaveURL('/dashboard');
 
     // verifies the UI loaded the correct heading
     const dashboardHeading = page.locator('h2');
@@ -28,11 +28,11 @@ test.describe('Movie Friend Core User Flows', () => {
 
   test('User can rate a movie and it appears in their profile', async ({ page }) => {
     // logs in to establish a session
-    await page.goto('http://localhost:3000/login');
+    await page.goto('/login');
     await page.fill('input[name="email"]', 'user@example.com');
     await page.fill('input[name="password"]', 'password');
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('http://localhost:3000/dashboard');
+    await expect(page).toHaveURL('/dashboard');
 
     // clicks the first movie card to view its details
     const firstMovie = page.locator('.movie-card').first();
@@ -50,7 +50,7 @@ test.describe('Movie Friend Core User Flows', () => {
     await page.click('button[aria-label="Rate 10 stars"]');
 
     // navigates to the user's personal ratings page
-    await page.goto('http://localhost:3000/my-ratings');
+    await page.goto('/my-ratings');
 
     // verifies the rated movie now appears in their collection
     await expect(page.locator('body')).toContainText(movieTitle as string);
