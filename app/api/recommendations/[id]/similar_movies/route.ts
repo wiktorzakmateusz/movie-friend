@@ -1,4 +1,4 @@
-// router that fetches user rating prediction
+// router that fetches user similar movies prediction
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";      
@@ -17,7 +17,7 @@ export async function GET(
   const token = session?.user?.accessToken;
 
   // fetching data from backend
-  const res = await fetch(`${BACKEND_URL}/recommendations/${id}/`, {
+  const res = await fetch(`${BACKEND_URL}/recommendations/${id}/similar_movies`, {
     headers: {
       "Content-Type": "application/json",
       ...(token && { "Authorization": `Bearer ${token}` }),
@@ -26,9 +26,9 @@ export async function GET(
   
   if (!res.ok) {
     if (res.status === 404) {
-      return NextResponse.json({ error: "Prediction not found" }, { status: 404 });
+      return NextResponse.json({ error: "Similar movies not found" }, { status: 404 });
     }
-    return NextResponse.json({ error: "Failed to fetch prediction" }, { status: res.status });
+    return NextResponse.json({ error: "Failed to fetch similar movies" }, { status: res.status });
   }
 
   const data = await res.json();

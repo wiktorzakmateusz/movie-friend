@@ -30,6 +30,7 @@ export default function MovieDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [predictedRating, setPredictedRating] = useState<number | null>(null);
+  const [similarMovies, setSimilarMovies] = useState<MovieDetail[]>([]);
 
   const [myRating, setMyRating] = useState<number | undefined>(undefined);
   const [hoverRating, setHoverRating] = useState<number>(0);
@@ -51,7 +52,7 @@ export default function MovieDetailPage() {
 
         try {
           // call to proxy api - rating prediction
-          const predictionRes = await fetch(`/api/recommendations/${id}/`);
+          const predictionRes = await fetch(`/api/recommendations/${id}/rating`);
           if (predictionRes.ok) { // error in backend
             const predictionData = await predictionRes.json();
             
@@ -62,6 +63,16 @@ export default function MovieDetailPage() {
           }
         } catch (predErr) { // error during data fetching
           console.error("Could not load prediction:", predErr);
+        }
+
+        try {
+          const similarRes = await fetch(`/api/recommendations/${id}/similar_movies`);
+          if (similarRes.ok) {
+            const similarData = await similarRes.json();
+            setSimilarMovies(similarData);
+          }
+        } catch (simErr) {
+          console.error("Could not load similar movies:", simErr);
         }
 
       } catch (err) {
@@ -292,18 +303,50 @@ export default function MovieDetailPage() {
                     {movie.plot || "No description available."}
                   </p>
               </div>
+
+              {similarMovies.length > 0 && (
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 mb-4">Similar Movies</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {similarMovies.slice(0, 5).map((simMovie) => (
+                      <Link 
+                        href={`/movie/${simMovie.id}`}
+                        key={simMovie.id} 
+                        className="group flex flex-col"
+                      >
+                        <div className="w-full aspect-[2/3] bg-gray-100 rounded-lg overflow-hidden mb-2 relative shadow-sm">
+                          {simMovie.poster ? (
+                            <img 
+                              src={simMovie.poster} 
+                              alt={simMovie.title} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-xs text-gray-400 p-2 text-center">
+                              No Poster
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="text-xs font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                          {simMovie.title}
+                        </h4>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
           </div>
 
           {/* right column: actions & predictions */}
           <div className="hidden lg:flex w-56 flex-col space-y-3">
-              {/* trailer (in development) */}
+              {/* trailer (in development)
               <button className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
                   <Play className="w-4 h-4 fill-current" /> Watch Trailer
-              </button>
+              </button> */}
               
               {/* prediction of rating */}
               {predictedRating !== null && (
-                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl text-center mt-4 shadow-sm">
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl text-center shadow-sm">
                     <span className="block text-xs text-blue-600 uppercase font-bold tracking-wider mb-1">Predicted</span>
                     <div className="flex items-center justify-center gap-1">
                         <span className="block text-3xl font-bold text-blue-900">{predictedRating}</span>
