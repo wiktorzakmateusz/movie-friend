@@ -3,7 +3,7 @@
 "use client"; // client-side rendering
 
 import { useState, useEffect, MouseEvent } from "react";
-import { Heart, HeartOff, Star, Trash2 } from "lucide-react"; // icons
+import { Heart, HeartOff, Star, Trash2, Lightbulb, StarOff } from "lucide-react"; // icons
 import Link from "next/link";
 import Image from "next/image";
 
@@ -14,7 +14,10 @@ interface MovieProps {
   poster: string;
   imdb_rating?: number;
   user_rating?: number | null;
+  ignore?: boolean;
   onRatingChange?: () => void;
+  onExplain?: () => void;
+  onUnignore?: (id: number) => void;
 }
 
 export default function MovieCard({
@@ -22,7 +25,10 @@ export default function MovieCard({
   title,
   poster,
   user_rating: initialUserRating,
+  ignore,
   onRatingChange,
+  onExplain,
+  onUnignore,
 }: MovieProps) {
   const [myRating, setMyRating] = useState<number | undefined>(
     initialUserRating === null ? undefined : initialUserRating
@@ -132,6 +138,40 @@ export default function MovieCard({
             <div className="flex items-center justify-center w-full h-full text-gray-400 text-sm">
               No Poster
             </div>
+          )}
+
+          {/* unignore interactive button */}
+          {ignore && (
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onUnignore) onUnignore(id);
+              }}
+              className="absolute top-2 left-2 flex items-center gap-1.5 p-1.5 bg-gray-800/80 hover:bg-gray-700 backdrop-blur-md text-gray-400 hover:text-gray-100 rounded-full z-30 shadow-md transition-all overflow-hidden group/unignore"
+              title="Restore to recommendations"
+            >
+              <StarOff className="w-4 h-4 shrink-0" />
+              
+              <span className="text-xs font-medium pr-1 hidden group-hover/unignore:block whitespace-nowrap">
+                Unignore
+              </span>
+            </button>
+          )}
+
+          {/* explain button */}
+          {onExplain && (
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onExplain();
+              }}
+              className="absolute top-2 left-2 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-full opacity-0 group-hover:opacity-100 transition-all z-30 shadow-md"
+              title="Explain recommendation"
+            >
+              <Lightbulb className="w-4 h-4" />
+            </button>
           )}
 
           {/* current rating if available */}
