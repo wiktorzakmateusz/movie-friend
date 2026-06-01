@@ -3,7 +3,7 @@
 "use client"; // client-side rendering
 
 import { useState, useEffect, MouseEvent } from "react";
-import { Heart, HeartOff, Star, Trash2, Lightbulb, StarOff } from "lucide-react"; // icons
+import { Heart, HeartOff, Star, Trash2, Lightbulb, StarOff, Ban } from "lucide-react"; // icons
 import Link from "next/link";
 import Image from "next/image";
 
@@ -18,6 +18,8 @@ interface MovieProps {
   onRatingChange?: () => void;
   onExplain?: () => void;
   onUnignore?: (id: number) => void;
+  onHide?: (id: number) => void;
+  onNegativeFeedback?: (id: number) => void;
 }
 
 export default function MovieCard({
@@ -29,6 +31,8 @@ export default function MovieCard({
   onRatingChange,
   onExplain,
   onUnignore,
+  onHide,
+  onNegativeFeedback
 }: MovieProps) {
   const [myRating, setMyRating] = useState<number | undefined>(
     initialUserRating === null ? undefined : initialUserRating
@@ -75,7 +79,7 @@ export default function MovieCard({
     }
   };
 
-  // deleting rating handler
+  // deleting rating handler (also used to unhide/unblock by removing the -1 rating)
   const handleDeleteRating = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -86,7 +90,7 @@ export default function MovieCard({
     try {
       setMyRating(undefined);
 
-      // call to proxi api - deleting a rating
+      // call to proxy api - deleting a rating
       const res = await fetch(`/api/ratings/${id}`, {
         method: "DELETE",
       });
@@ -109,14 +113,84 @@ export default function MovieCard({
     console.log("Wishlist functionality coming soon");
   };
 
-  // placeholder for movie hiding
-  const handleHide = (e: MouseEvent) => {
+  // hiding movie handler
+  const handleHide = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Hide movie functionality coming soon");
+    
+    setIsUpdating(true);
+    
+    try {
+      await fetch("/api/ratings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ movie_id: id, rating: -1 }),
+      });
+
+      const res = await fetch(`/api/ratings/${id}/ignore`, {
+        method: "PATCH",
+        body: JSON.stringify({ ignore: true }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (!res.ok) throw new Error("Failed to ignore movie");
+
+      if (onHide) {
+        onHide(id);
+      } else if (onRatingChange) {
+        onRatingChange();
+      }
+      
+    } catch (err) {
+      console.error("Failed to hide/ignore movie:", err);
+      alert("Could not hide the movie.");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const isRated = myRating !== undefined && myRating !== null;
+  // negative feedback handling
+  const handleNegativeFeedback = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsUpdating(true);
+    
+    try {
+      await fetch("/api/ratings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ movie_id: id, rating: -1 }),
+      });
+
+      const res = await fetch(`/api/ratings/${id}/ignore`, {
+        method: "PATCH",
+        body: JSON.stringify({ ignore: false }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (!res.ok) throw new Error("Failed to update ignore flag");
+
+      if (onNegativeFeedback) {
+        onNegativeFeedback(id);
+      } else if (onRatingChange) {
+        onRatingChange();
+      }
+      
+    } catch (err) {
+      console.error("Failed to incorporate negative feedback:", err);
+      alert("Could not incorporate negative feedback on a movie.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const isNegativeRating = myRating === -1;
+  const isHidden = isNegativeRating && ignore === true;
+  const isBlocked = isNegativeRating && ignore === false;
+  const isIgnored = ignore === true && !isNegativeRating;
+  const isRated = myRating !== undefined && myRating !== null && myRating > 0;
+  
 
   // content
   return (
@@ -140,47 +214,94 @@ export default function MovieCard({
             </div>
           )}
 
-          {/* unignore interactive button */}
-          {ignore && (
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (onUnignore) onUnignore(id);
-              }}
-              className="absolute top-2 left-2 flex items-center gap-1.5 p-1.5 bg-gray-800/80 hover:bg-gray-700 backdrop-blur-md text-gray-400 hover:text-gray-100 rounded-full z-30 shadow-md transition-all overflow-hidden group/unignore"
-              title="Restore to recommendations"
-            >
-              <StarOff className="w-4 h-4 shrink-0" />
-              
-              <span className="text-xs font-medium pr-1 hidden group-hover/unignore:block whitespace-nowrap">
-                Unignore
-              </span>
-            </button>
-          )}
+          <div className="absolute top-2 left-2 z-30 flex items-start gap-1.5">
+            
+            {/* unhide button */}
+            {isHidden && (
+              <button 
+                onClick={handleDeleteRating}
+                disabled={isUpdating}
+                className="flex items-center gap-1.5 p-1.5 bg-gray-800/80 hover:bg-gray-700 backdrop-blur-md text-gray-400 hover:text-gray-100 rounded-full shadow-md transition-all overflow-hidden group/unignore disabled:opacity-50"
+                title="Unhide movie"
+              >
+                <HeartOff className="w-4 h-4 shrink-0" />
+                <span className="text-xs font-medium pr-1 hidden group-hover/unignore:block whitespace-nowrap">
+                  Unhide
+                </span>
+              </button>
+            )}
 
-          {/* explain button */}
-          {onExplain && (
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onExplain();
-              }}
-              className="absolute top-2 left-2 p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-full opacity-0 group-hover:opacity-100 transition-all z-30 shadow-md"
-              title="Explain recommendation"
-            >
-              <Lightbulb className="w-4 h-4" />
-            </button>
-          )}
+            {/* unblock button */}
+            {isBlocked && (
+              <button 
+                onClick={handleDeleteRating}
+                disabled={isUpdating}
+                className="flex items-center gap-1.5 p-1.5 bg-gray-800/80 hover:bg-gray-700 backdrop-blur-md text-gray-400 hover:text-gray-100 rounded-full shadow-md transition-all overflow-hidden group/unignore disabled:opacity-50"
+                title="Unblock movie"
+              >
+                <Ban className="w-4 h-4 shrink-0" />
+                <span className="text-xs font-medium pr-1 hidden group-hover/unignore:block whitespace-nowrap">
+                  Unblock
+                </span>
+              </button>
+            )}
 
-          {/* current rating if available */}
-          {isRated && (
-            <div className="absolute top-2 right-2 z-10 bg-blue-600/90 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-md">
-              <Star className="w-3 h-3 fill-white text-white" />
-              {myRating}
-            </div>
-          )}
+            {/* unignore button */}
+            {isIgnored && (
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onUnignore) onUnignore(id);
+                }}
+                className="flex items-center gap-1.5 p-1.5 bg-gray-800/80 hover:bg-gray-700 backdrop-blur-md text-gray-400 hover:text-gray-100 rounded-full shadow-md transition-all overflow-hidden group/unignore"
+                title="Restore to recommendations"
+              >
+                <StarOff className="w-4 h-4 shrink-0" />
+                <span className="text-xs font-medium pr-1 hidden group-hover/unignore:block whitespace-nowrap">
+                  Unignore
+                </span>
+              </button>
+            )}
+
+            {/* explain button */}
+            {onExplain && (
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onExplain();
+                }}
+                className="p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md"
+                title="Explain recommendation"
+              >
+                <Lightbulb className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="absolute top-2 right-2 z-30 flex flex-col items-end gap-1.5">
+
+            {/* current rating if available */}
+            {isRated && (
+              <div className="bg-blue-600/90 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-md">
+                <Star className="w-3 h-3 fill-white text-white" />
+                {myRating}
+              </div>
+            )}
+
+            {/* negative feedback button - only showed if not rated */}
+            {!isRated && !isNegativeRating && (
+              <button 
+                onClick={handleNegativeFeedback}
+                disabled={isUpdating}
+                className="p-2 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-md disabled:opacity-50"
+                title="Block similar movies"
+              >
+                <Ban className="w-4 h-4 text-white hover:text-red-400 transition-colors" />
+              </button>
+            )}
+          </div>
 
           {/* hover rating adding */}
           <div className="absolute inset-0 flex flex-col items-center justify-end pb-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent">
@@ -191,7 +312,9 @@ export default function MovieCard({
             }`}>
               {hoverRating > 0 
                 ? getRatingLabel(hoverRating) 
-                : "What's your rating?"}
+                : isNegativeRating 
+                  ? "Change rating?" 
+                  : "What's your rating?"}
             </span>
 
             {/* stars */}
@@ -201,7 +324,8 @@ export default function MovieCard({
             >
               {[...Array(10)].map((_, i) => {
                 const starValue = i + 1;
-                const isActive = starValue <= (hoverRating || myRating || 0);
+                const activeRating = myRating && myRating > 0 ? myRating : 0;
+                const isActive = starValue <= (hoverRating || activeRating);
                 
                 return (
                   <button
@@ -255,8 +379,9 @@ export default function MovieCard({
 
         <button
           onClick={handleHide}
-          className="p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
-          title="Hide Movie (Coming Soon)"
+          disabled={isUpdating}
+          className="p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition disabled:opacity-50"
+          title="Hide Movie"
         >
           <HeartOff className="w-5 h-5" />
         </button>
