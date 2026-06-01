@@ -42,6 +42,12 @@ export default function Dashboard() {
         // call to proxy api
         const res = await fetch("/api/recommendations");
 
+        // not logged in user
+        if (res.status === 401) {
+          setError("Please log in to see recommendations.");
+          return; 
+        }
+
         if (!res.ok) { // error in backend
           throw new Error("Failed to load recommendations");
         }
@@ -60,7 +66,7 @@ export default function Dashboard() {
     fetchMovies();
   }, []);
   
-  // fetching recommendation explenation
+  // fetching recommendation explanation
   useEffect(() => {
     if (!explainingMovie) {
       setExplanations([]); 
@@ -117,6 +123,11 @@ export default function Dashboard() {
     }
   };
 
+  // removing ignored movie from the main recommendations grid
+  const handleMovieIgnore = (movieId: number) => {
+    setMovies((prevMovies) => prevMovies.filter((movie) => movie.id !== movieId));
+  };
+
   // page content
   return (
     <div className="flex min-h-screen bg-gray-50 relative overflow-x-hidden">
@@ -168,6 +179,8 @@ export default function Dashboard() {
                             key={movie.id}
                             {...movie} 
                             onExplain={() => setExplainingMovie(movie)}
+                            onHide={handleMovieIgnore}
+                            onNegativeFeedback={handleMovieIgnore}
                         />
                     ))}
                  </div>
