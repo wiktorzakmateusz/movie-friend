@@ -7,13 +7,23 @@ import { authOptions } from "@/utils/auth";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export async function GET(request: Request) {
+
+  // extracting session parameters
+  const { searchParams } = new URL(request.url);
+
   try {
     // getting token
     const session = await getServerSession(authOptions);
     const token = session?.user?.accessToken;
 
+    // appending query string if it exists
+    const queryString = searchParams.toString();
+    const targetUrl = queryString 
+      ? `${API_URL}/recommendations/?${queryString}` 
+      : `${API_URL}/recommendations/`;
+    
     // fetching data from backend
-    const res = await fetch(`${API_URL}/recommendations/`, {
+    const res = await fetch(targetUrl, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

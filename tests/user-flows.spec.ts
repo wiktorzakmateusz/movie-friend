@@ -46,7 +46,7 @@ test.describe('Movie Friend Core User Flows', () => {
 
     // Interacts with the rating component
     // playwright hovers the image container to reveal the star UI, then clicks the 10-star button
-    await page.locator('.group').hover(); 
+    await page.locator('.group').first().hover(); 
     await page.click('button[aria-label="Rate 10 stars"]');
 
     // navigates to the user's personal ratings page

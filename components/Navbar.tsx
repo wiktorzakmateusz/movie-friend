@@ -62,9 +62,9 @@ export default function Navbar() {
            </Link>
         )}
         
-        <button className="p-2 hover:bg-gray-100 rounded-full">
+        {/* <button className="p-2 hover:bg-gray-100 rounded-full">
           <Menu className="w-5 h-5" />
-        </button>
+        </button> */}
       </div>
     </nav>
   );

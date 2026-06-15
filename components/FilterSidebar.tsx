@@ -7,25 +7,23 @@ import { X, Star } from "lucide-react"; // icons
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  sortBy: "relevance" | "popular";
+  setSortBy: (sort: "relevance" | "popular") => void;
+  selectedGenre: string;
+  setSelectedGenre: (genre: string) => void;
 }
 
 const AVAILABLE_GENRES = [
   "Action", "Comedy", "Drama", "Sci-Fi", "Horror", "Romance", "Thriller"
 ];
 
-export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
-
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [minYear, setMinYear] = useState<string>("2000");
-  const [minRating, setMinRating] = useState<number>(3.0);
+export default function FilterSidebar({ isOpen, onClose, sortBy, setSortBy, selectedGenre, setSelectedGenre 
+}: SidebarProps) {
 
   // genre toggle
   const handleGenreToggle = (genre: string) => {
-    setSelectedGenres((prev) =>
-      prev.includes(genre)
-        ? prev.filter((g) => g !== genre) // remove if selected
-        : [...prev, genre] // add if not selected
-    );
+    // if the clicked genre is already selected, clears it, otherwise, sets it
+    setSelectedGenre(selectedGenre === genre ? "" : genre);
   };
 
   return (
@@ -61,7 +59,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
                         <label key={genre} className="flex items-center gap-2 cursor-pointer text-sm text-gray-600 hover:text-blue-600">
                           <input 
                             type="checkbox" 
-                            checked={selectedGenres.includes(genre)}
+                            checked={selectedGenre === genre}
                             onChange={() => handleGenreToggle(genre)}
                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
                           /> 
@@ -72,7 +70,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
                   </div>
 
                   {/* year filter */}
-                  <div>
+                  {/* <div>
                     <label className="font-medium text-sm text-gray-700 mb-2 block">
                       Released after (Year)
                     </label>
@@ -84,10 +82,10 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
                       onChange={(e) => setMinYear(e.target.value)}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
-                  </div>
+                  </div> */}
 
                   {/* min rating slider */}
-                  <div>
+                  {/* <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="font-medium text-sm text-gray-700">Min Rating</label>
                       <span className="text-sm font-bold text-blue-600 flex items-center gap-1">
@@ -107,7 +105,7 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
                       <span>0.5</span>
                       <span>5.0</span>
                     </div>
-                  </div>
+                  </div> */}
 
               </div>
           </div>
@@ -119,16 +117,30 @@ export default function FilterSidebar({ isOpen, onClose }: SidebarProps) {
               <h4 className="font-semibold text-sm text-gray-500 mb-3 tracking-wider">SORTING</h4>
               <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
-                      <input type="radio" name="sort" id="relevance" defaultChecked className="text-blue-600 focus:ring-blue-500"/>
-                      <label htmlFor="relevance">Relevance</label>
+                      <input 
+                        type="radio" 
+                        name="sort" 
+                        id="relevance" 
+                        checked={sortBy === "relevance"}
+                        onChange={() => setSortBy("relevance")}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <label htmlFor="relevance" className="cursor-pointer">Relevance</label>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                       <input type="radio" name="sort" id="year_desc" className="text-blue-600 focus:ring-blue-500"/>
                       <label htmlFor="year_desc">Newest First</label>
-                  </div>
+                  </div> */}
                   <div className="flex items-center gap-2">
-                      <input type="radio" name="sort" id="rating_desc" className="text-blue-600 focus:ring-blue-500"/>
-                      <label htmlFor="rating_desc">Highest Rated</label>
+                      <input 
+                        type="radio" 
+                        name="sort" 
+                        id="rating_desc" 
+                        checked={sortBy === "popular"}
+                        onChange={() => setSortBy("popular")}
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <label htmlFor="rating_desc" className="cursor-pointer">Most popular</label>
                   </div>
               </div>
           </div>
