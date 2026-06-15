@@ -28,6 +28,8 @@ export default function Dashboard() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortBy, setSortBy] = useState<"relevance" | "popular">("relevance");
+  const [selectedGenre, setSelectedGenre] = useState<string>("");
 
   // states for explaining recommendations
   const [explainingMovie, setExplainingMovie] = useState<Movie | null>(null);
@@ -35,21 +37,37 @@ export default function Dashboard() {
   const [isExplaining, setIsExplaining] = useState(false);
   const [explainError, setExplainError] = useState("");
 
-  // fetching movie recommendations
+  // fetching movie recommendations / top pop
   useEffect(() => {
     const fetchMovies = async () => {
+      setIsLoading(true);
+      setError("");
+
       try {
         // call to proxy api
-        const res = await fetch("/api/recommendations");
+        const baseEndpoint = sortBy === "popular" ? "/api/search" : "/api/recommendations";
+
+        const params = new URLSearchParams();
+        if (sortBy === "popular") {
+            params.append("sort_by", "popular");
+        }
+        if (selectedGenre) {
+            params.append("genre", selectedGenre);
+        }
+
+        const queryString = params.toString();
+        const url = queryString ? `${baseEndpoint}?${queryString}` : baseEndpoint;
+
+        const res = await fetch(url);
 
         // not logged in user
         if (res.status === 401) {
-          setError("Please log in to see recommendations.");
+          setError("Please log in to see your movies.");
           return; 
         }
 
         if (!res.ok) { // error in backend
-          throw new Error("Failed to load recommendations");
+          throw new Error(`Failed to load from ${baseEndpoint}`);
         }
 
         const data = await res.json();
@@ -57,14 +75,14 @@ export default function Dashboard() {
 
       } catch (err) { // error during data fetching
         console.error(err);
-        setError("Could not load recommendations. Please try again later.");
+        setError("Could not load movies. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMovies();
-  }, []);
+  }, [sortBy, selectedGenre]);
   
   // fetching recommendation explanation
   useEffect(() => {
@@ -136,6 +154,10 @@ export default function Dashboard() {
       <FilterSidebar 
         isOpen={isSidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        selectedGenre={selectedGenre}
+        setSelectedGenre={setSelectedGenre}
       />
 
       <main className="flex-1 p-8">
@@ -187,11 +209,11 @@ export default function Dashboard() {
               )}
 
               {/* "I dont like this" button (placeholder) */}
-              <div className="flex justify-center mt-8">
+              {/* <div className="flex justify-center mt-8">
                   <button className="px-6 py-2 border-2 border-gray-300 rounded-full text-gray-600 hover:bg-gray-100 hover:border-gray-400 transition">
                       I don't like these :(
                   </button>
-              </div>
+              </div> */}
             </>
         )}
       </main>
